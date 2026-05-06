@@ -7,7 +7,7 @@ function App() {
 
   const getWeather = async () => {
     const response = await fetch(
-      `http://127.0.0.1:8000/weather?city=${city}`
+      `https://weather-devops-project.onrender.com/weather?city=${city}`
     );
 
     const data = await response.json();
