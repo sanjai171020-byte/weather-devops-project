@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/") 
 def home():
     return {"message": "Weather API Running"}
 
@@ -37,9 +37,10 @@ def get_weather(city: str):
     country = results[0].get("country", "")
 
     weather_url = (
-        f"https://api.open-meteo.com/v1/forecast?"
-        f"latitude={latitude}&longitude={longitude}"
-        f"&current=temperature_2m,wind_speed_10m"
+          f"https://api.open-meteo.com/v1/forecast?"
+          f"latitude={latitude}&longitude={longitude}"
+          f"&daily=temperature_2m_max,temperature_2m_min"
+          f"&timezone=auto"
     )
 
     weather_response = requests.get(weather_url, verify=False)
@@ -53,9 +54,19 @@ def get_weather(city: str):
             "raw_response": weather_data
         }
 
-    return {
-        "city": city_name,
-        "country": country,
-        "temperature": current["temperature_2m"],
-        "windspeed": current["wind_speed_10m"]
-    }
+    daily = weather_data["daily"]
+
+forecast = []
+
+for i in range(5):
+    forecast.append({
+        "date": daily["time"][i],
+        "max_temp": daily["temperature_2m_max"][i],
+        "min_temp": daily["temperature_2m_min"][i]
+    })
+
+  return {
+    "city": city_name,
+    "country": country,
+    "forecast": forecast
+}
