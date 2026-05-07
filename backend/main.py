@@ -6,6 +6,7 @@ import urllib3
 urllib3.disable_warnings()
 
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,14 +15,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/") 
+@app.get("/")
 def home():
     return {"message": "Weather API Running"}
 
-
 @app.get("/weather")
 def get_weather(city: str):
-
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
     geo_response = requests.get(geo_url, verify=False)
     geo_data = geo_response.json()
@@ -37,36 +36,28 @@ def get_weather(city: str):
     country = results[0].get("country", "")
 
     weather_url = (
-          f"https://api.open-meteo.com/v1/forecast?"
-          f"latitude={latitude}&longitude={longitude}"
-          f"&daily=temperature_2m_max,temperature_2m_min"
-          f"&timezone=auto"
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={latitude}&longitude={longitude}"
+        f"&daily=temperature_2m_max,temperature_2m_min"
+        f"&timezone=auto"
     )
 
     weather_response = requests.get(weather_url, verify=False)
     weather_data = weather_response.json()
 
-    current = weather_data.get("current")
-
-    if not current:
-        return {
-            "error": "Weather data not found",
-            "raw_response": weather_data
-        }
-
     daily = weather_data["daily"]
 
-forecast = []
+    forecast = []
 
-for i in range(5):
-    forecast.append({
-        "date": daily["time"][i],
-        "max_temp": daily["temperature_2m_max"][i],
-        "min_temp": daily["temperature_2m_min"][i]
-    })
+    for i in range(5):
+        forecast.append({
+            "date": daily["time"][i],
+            "max_temp": daily["temperature_2m_max"][i],
+            "min_temp": daily["temperature_2m_min"][i]
+        })
 
-  return {
-    "city": city_name,
-    "country": country,
-    "forecast": forecast
-}
+    return {
+        "city": city_name,
+        "country": country,
+        "forecast": forecast
+    }
